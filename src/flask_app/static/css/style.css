@@ -1,0 +1,193 @@
+:root {
+    /*color palette*/
+    --bg-void: #09090b;      
+    --bg-surface: #18181b;   
+    --bg-hover: #27272a;     
+    
+    --primary-blue: #3b82f6; 
+    --primary-glow: rgba(59, 130, 246, 0.15);
+    
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
+    
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-void);
+    color: var(--text-main);
+    display: flex;
+    height: 100vh;
+    overflow: hidden; 
+}
+
+/*sidebar*/
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid #27272a;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    transition: width 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    font-size: 20px;
+    color: #eab308; 
+}
+
+.logo-text {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+}
+.toggle-btn:hover { background-color: var(--bg-hover); color: white; }
+
+/* Navigation Links*/
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px 0;
+}
+
+.nav-links li { margin-bottom: 8px; }
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text-muted);
+    border-radius: 12px; 
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Hover State */
+.nav-links a:hover {
+    background-color: var(--bg-hover);
+    color: white;
+}
+
+/* Active State*/
+.nav-links a.active {
+    background-color: var(--primary-glow);
+    color: var(--primary-blue);
+}
+
+/*market ticker*/
+.sidebar-section {
+    flex-grow: 1; 
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #52525b; 
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+
+.ticker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ticker-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 8px 12px;
+    background-color: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+
+.ticker-name { color: var(--text-muted); }
+.t-red { color: var(--accent-red); font-weight: 600; font-family: 'Roboto Mono'; }
+.t-green { color: var(--accent-green); font-weight: 600; font-family: 'Roboto Mono'; }
+
+
+/*server health*/
+.server-status-card {
+    background-color: #0f0f11; 
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #27272a;
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.green { background-color: var(--accent-green); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.purple { background-color: var(--accent-purple); }
+
+.sync-text {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #27272a;
+    font-size: 11px;
+    color: #52525b;
+    text-align: right;
+}
+
+/*main content*/
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+/* Headings */
+h1 { margin: 0 0 8px 0; font-size: 24px; font-weight: 600; }
+p { color: var(--text-muted); margin-top: 0; }
+
+/*collapsed state*/
+.sidebar.collapsed { width: 70px; padding: 24px 12px; }
+.sidebar.collapsed .logo-text, 
+.sidebar.collapsed .link-text, 
+.sidebar.collapsed .sidebar-section,
+.sidebar.collapsed .server-status-card { 
+    display: none; 
+}
+.sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
+.sidebar.collapsed .logo-area { justify-content: center; }
+.sidebar.collapsed .nav-links a { justify-content: center; padding: 12px; }

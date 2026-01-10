@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPulse AI</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <nav class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-area">
+                <div class="logo-icon">⚡</div>
+                <span class="logo-text">MarketPulse</span>
+            </div>
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active_page == 'dashboard' else '' }}">
+                    <span class="icon">📊</span>
+                    <span class="link-text">Market Overview</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('price_explorer') }}" class="{{ 'active' if active_page == 'explorer' else '' }}">
+                    <span class="icon">🔎</span>
+                    <span class="link-text">Price Explorer</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-section">
+            <div class="section-title">DATA SOURCES</div>
+            <div class="ticker-list">
+                {% for vendor in vendor_list %}
+                <div class="ticker-item">
+                    <span class="ticker-name" style="color: #a1a1aa;">{{ vendor }}</span>
+                    <span style="font-size: 10px; color: #10b981;">●</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="server-status-card">
+            <div class="status-row">
+                <span class="dot green"></span>
+                <span class="status-label">DB: {{ server_status.db }}</span>
+            </div>
+            <div class="status-row">
+                <span class="dot purple"></span>
+                <span class="status-label">AI: {{ server_status.ai }}</span>
+            </div>
+            <div class="sync-text">Synced: {{ server_status.sync }}</div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+
+</body>
+</html>

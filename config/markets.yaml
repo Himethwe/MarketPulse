@@ -1,0 +1,17 @@
+#Websites scraped from
+markets:
+  - name: "Nanotek"
+    base_url: "https://www.nanotek.lk/"
+    category: "Computers & Laptops"
+
+  - name: "Barclays"
+    base_url: "https://barclays.lk/"
+    category: "Electronics"
+
+  - name: "MSK Computers"
+    base_url: "https://mskcomputers.lk/"
+    category: "PC Components"
+
+  - name: "SL Techie"
+    base_url: "https://sltechie.lk/"
+    category: "Gaming & PC"

@@ -1,0 +1,24 @@
+# --- Python Internals ---
+__pycache__/
+*.pyc
+
+# --- Virtual Environment (NEVER Upload This) ---
+venv/
+env/
+
+# --- Environment Variables (Security Risk) ---
+.env
+
+# --- Logs & Runtime Data ---
+*.log
+src/logs/
+scraper_errors.log
+
+# --- OS System Files ---
+.DS_Store
+Thumbs.db
+
+# --- IDE Settings (Optional) ---
+.vscode/
+.idea/
+

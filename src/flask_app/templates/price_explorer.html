@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/explorer.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+    {% macro tier_card(title, subtitle, listings, avg_price, tier_id, tier_class, hex_color) %}
+    <div class="tier-card {{ tier_class }}" id="card-{{ tier_id }}">
+        <div class="tier-header" 
+             onclick="toggleTier(this)"
+             data-tier-id="{{ tier_id }}"
+             data-color="{{ hex_color }}"
+             data-ids='{{ listings|map(attribute="id")|list|tojson }}'>
+             
+            <div class="tier-title-group">
+                <h3>{{ title }}</h3>
+                <span>{{ subtitle }}</span>
+            </div>
+            
+            <div class="tier-right-group">
+                <span class="count-badge">{{ listings|length }} Listings</span>
+                <div class="tier-meta">
+                    <span class="avg-label">Avg:</span>
+                    <span class="tier-price">LKR {{ avg_price }}</span>
+                    <span class="arrow-icon">▼</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tier-body" id="body-{{ tier_id }}">
+            <div class="tier-ai-panel">
+                <div class="ai-header">
+                    <span class="ai-badge" id="badge-{{ tier_id }}">Running AI...</span>
+                    <span style="font-size:12px; color:#71717a; display:block; margin-top:4px;">7-Day Forecast</span>
+                </div>
+                <div class="tier-chart-container">
+                    <canvas id="chart-{{ tier_id }}"></canvas>
+                </div>
+            </div>
+
+            <div class="tier-listings">
+                {% for item in listings %}
+                <div class="listing-row">
+                    <div class="l-info">
+                        <span class="l-vendor">{{ item.vendor }}</span>
+                        <span class="l-name">{{ item.name }}</span>
+                    </div>
+                    <div class="l-meta">
+                        {% if item.stock %}<span class="stk in">In Stock</span>{% else %}<span class="stk out">OOS</span>{% endif %}
+                        <span class="l-price">LKR {{ item.price_fmt }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endmacro %}
+
+    <div class="header-container">
+        <header class="pill-header">
+            <h1>Price Explorer</h1>
+        </header>
+    </div>
+
+    <div class="search-section">
+        <form action="{{ url_for('price_explorer') }}" method="get" class="search-form">
+            <input type="text" name="q" class="main-search-input" placeholder="Search laptop (e.g. 'Legion 5')..." value="{{ query }}">
+            <button type="submit" class="main-search-btn">Analyze Market</button>
+        </form>
+    </div>
+
+    {% if query %}
+    <div class="tier-container">
+        <div class="market-summary-header">
+            <h2 class="section-label">Market Analysis Report: "{{ query }}"</h2>
+            <p class="summary-text">Found <strong>{{ search_stats.count }}</strong> listings. Price range: <strong>LKR {{ search_stats.min }}</strong> - <strong>LKR {{ search_stats.max }}</strong>.</p>
+        </div>
+        
+        {% if tiers.premium.listings %}
+            {{ tier_card('💎 Premium Tier', 'Flagship Models & High Performance', tiers.premium.listings, tiers.premium.avg, 'premium', 'tier-premium', '#d946ef') }}
+        {% endif %}
+
+        {% if tiers.standard.listings %}
+            {{ tier_card('⚖️ Standard Market', 'Most Common Market Listings', tiers.standard.listings, tiers.standard.avg, 'standard', 'tier-standard', '#3b82f6') }}
+        {% endif %}
+
+        {% if tiers.value.listings %}
+            {{ tier_card('📉 Best Value', 'Clearance Deals & Entry Level', tiers.value.listings, tiers.value.avg, 'value', 'tier-value', '#10b981') }}
+        {% endif %}
+
+        {% if not tiers.premium.listings and not tiers.standard.listings and not tiers.value.listings %}
+            <div class="no-results" style="text-align:center; padding:60px; color:#52525b; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">
+                <div style="font-size:30px; margin-bottom:10px;">🔍</div>
+                No market data found for this model.
+            </div>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <div class="default-mode">
+        <div class="results-area-scroll">
+            <h3 style="color:#a1a1aa; font-size:12px; margin-bottom:15px; text-transform:uppercase;">Discovery Feed</h3>
+            <div class="watchlist-grid">
+                {% for item in watchlist %}
+                <div class="product-card" 
+                     onclick="loadSingleInspector(this)"
+                     data-id="{{ item.id }}"
+                     data-name="{{ item.name }}">
+                    <div class="card-icon-area">🔥</div>
+                    <div class="card-content">
+                        <h3>{{ item.name }}</h3>
+                        <div class="card-footer">
+                            <span class="card-vendor">{{ item.vendor }}</span>
+                            <span class="card-price">LKR {{ item.price }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="side-panel-static">
+            <div class="inspector-empty" id="defaultEmpty">
+                <div style="font-size: 40px; margin-bottom:20px;">🤖</div>
+                <h3>AI Forecast</h3>
+                <p style="font-size: 14px; color: #71717a;">Select a product from the list to view price prediction.</p>
+            </div>
+            <div class="inspector-content" id="defaultContent">
+                <div class="panel-header">
+                    <h2 id="defName">Product Name</h2>
+                    <div id="defAvg" class="avg-price-display">Avg: LKR 0</div>
+                </div>
+                <div class="panel-chart-area">
+                    <canvas id="defaultChart"></canvas>
+                </div>
+                <div class="panel-badge" id="defBadge">Loading...</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        let singleChart = null;
+        function getBadgeClass(text) {
+            if (text.includes('BUY')) return 'b-green';
+            if (text.includes('WAIT') || text.includes('CAUTION')) return 'b-red';
+            return 'b-gray'; 
+        }
+
+        async function toggleTier(element) {
+            const tierId = element.getAttribute('data-tier-id');
+            const productIds = JSON.parse(element.getAttribute('data-ids'));
+            const themeColor = element.getAttribute('data-color') || '#3b82f6'; 
+
+            const body = document.getElementById(`body-${tierId}`);
+            const card = document.getElementById(`card-${tierId}`);
+            const chartCanvas = document.getElementById(`chart-${tierId}`);
+
+            if (body.style.maxHeight) {
+                body.style.maxHeight = null;
+                card.classList.remove('open');
+            } else {
+                card.classList.add('open');
+                body.style.maxHeight = body.scrollHeight + "px";
+                
+                if (chartCanvas.getAttribute('data-loaded') === 'true') return;
+
+                try {
+                    const response = await fetch('/api/analyze_tier', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ids: productIds})
+                    });
+                    const data = await response.json();
+                    
+                    const badge = document.getElementById(`badge-${tierId}`);
+                    badge.innerText = data.recommendation;
+                    badge.className = "ai-badge " + getBadgeClass(data.recommendation);
+
+                    const ctx = chartCanvas.getContext('2d');
+                    
+                    const r = parseInt(themeColor.slice(1, 3), 16);
+                    const g = parseInt(themeColor.slice(3, 5), 16);
+                    const b = parseInt(themeColor.slice(5, 7), 16);
+                    const bgOverlay = `rgba(${r}, ${g}, ${b}, 0.1)`;
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.dates,
+                            datasets: [{
+                                label: 'Forecast', data: data.prices,
+                                borderColor: themeColor, backgroundColor: bgOverlay,
+                                fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { 
+                                legend: { display: false },
+                                title: { 
+                                    display: true, text: '7-Day Price Forecast', 
+                                    color: '#71717a', font: { size: 11, weight: 'normal' }, padding: { bottom: 10 }
+                                }
+                            },
+                            scales: { y: { display:false }, x: { grid: {display:false}, ticks: { color: '#52525b' } } }
+                        }
+                    });
+                    chartCanvas.setAttribute('data-loaded', 'true');
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        async function loadSingleInspector(element) {
+            const id = element.getAttribute('data-id');
+            const name = element.getAttribute('data-name');
+            document.querySelectorAll('.product-card').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('defaultEmpty').style.display = 'none';
+            document.getElementById('defaultContent').classList.add('visible');
+            document.getElementById('defName').innerText = name.substring(0, 40) + (name.length>40?'...':'');
+
+            try {
+                const response = await fetch(`/api/analyze/${id}`);
+                const data = await response.json();
+                const sum = data.prices.reduce((a, b) => a + b, 0);
+                const avg = (sum / data.prices.length) || 0;
+                document.getElementById('defAvg').innerText = "Avg Predicted: LKR " + Math.round(avg).toLocaleString();
+                const badge = document.getElementById('defBadge');
+                badge.innerText = data.recommendation;
+                badge.className = "panel-badge " + getBadgeClass(data.recommendation);
+
+                const ctx = document.getElementById('defaultChart').getContext('2d');
+                if (singleChart) singleChart.destroy();
+                singleChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            data: data.prices, borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                            fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { top: 10, right: 20, left: 20, bottom: 0 } },
+                        plugins: { 
+                            legend: { display: false },
+                            title: { display: true, text: 'Future Price Prediction', color: '#a1a1aa', font: { size: 12 }, padding: { bottom: 20 } },
+                            tooltip: { enabled: true, intersect: false, mode: 'index' }
+                        },
+                        scales: { y: { display:false }, x: { grid: {display:false}, ticks: { color: '#52525b', fontSize: 10 } } }
+                    }
+                });
+            } catch (e) { console.error(e); }
+        }
+    </script>
+{% endblock %}
