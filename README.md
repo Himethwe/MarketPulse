@@ -45,7 +45,6 @@ Follow these steps to run the project locally.
 git clone [https://github.com/HimethWe/MarketPulse.git](https://github.com/HimethWe/MarketPulse.git)
 cd MarketPulse
 ```
-````
 
 ### 2. Set Up Virtual Environment
 
@@ -75,7 +74,6 @@ python src/flask_app/app.py
 
 Open your browser and navigate to: `http://127.0.0.1:5000`
 
----
 
 ## 🔄 Automated Data Pipeline (Local Setup)
 
