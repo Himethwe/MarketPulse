@@ -25,11 +25,11 @@ _Search view with tiered pricing analysis_
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.12, Flask
-- **Database:** SQLite (Lightweight & Portable)
+- **Backend:** Python,Flask
+- **Database:** Postgre SQL
 - **Data Processing:** Pandas, NumPy
-- **Machine Learning:** Scikit-Learn (Linear Regression for Time-Series Forecasting)
-- **Web Scraping:** Selenium WebDriver
+- **Machine Learning:** Scikit-Learn, XGBoost, sentence_transformers
+- **Web Scraping:** Selenium WebDriver, BeautifulSoup
 - **Frontend:** HTML5, CSS3, Chart.js
 - **Automation:** Windows Task Scheduler & Batch Scripting
 
