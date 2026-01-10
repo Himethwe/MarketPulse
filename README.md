@@ -1,4 +1,3 @@
-````markdown
 # ⚡ MarketPulse AI - Intelligent Price Tracker
 
 **MarketPulse** is a full-stack data intelligence platform designed to track, analyze, and predict laptop prices across multiple e-commerce vendors in Sri Lanka. It combines automated web scraping with machine learning to provide actionable market insights.
@@ -95,6 +94,3 @@ To keep the dashboard data fresh, this project includes a local automation scrip
 
 The system will now wake up automatically, fetch the latest prices from 4+ vendors, update the database, and retrain the AI models every day.
 
-```
-
-```
