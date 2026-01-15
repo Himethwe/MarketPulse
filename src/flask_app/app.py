@@ -48,8 +48,32 @@ def get_movers(conn):
                                 'abs_change': abs(pct)
                             })
             movers.sort(key=lambda x: x['abs_change'], reverse=True)
-            return movers[:5]
+            return movers[:4] # Reduced to 4 to fit space
     except: return []
+
+# NEW FUNCTION: Get specific out-of-stock items
+def get_stock_alerts_list(conn):
+    alerts = []
+    try:
+        with conn.cursor() as cur:
+            sql = """
+                SELECT p.name, m.vendor_name, m.price 
+                FROM market_data m
+                JOIN products p ON m.product_id = p.id
+                WHERE m.is_in_stock = FALSE 
+                ORDER BY m.scraped_at DESC 
+                LIMIT 4
+            """
+            cur.execute(sql)
+            rows = cur.fetchall()
+            for r in rows:
+                alerts.append({
+                    'name': r[0][:18] + '..' if len(r[0]) > 18 else r[0],
+                    'vendor': r[1],
+                    'price': f"LKR {float(r[2]):,.0f}"
+                })
+    except: pass
+    return alerts
 
 #discovery feed
 def get_discovery_feed(conn):
@@ -125,6 +149,7 @@ def dashboard():
     stats = {'products': 0, 'stock_alerts': 0}
     chart_data = {'labels': [], 'prices': []}
     movers_data = []
+    stock_alerts_list = [] # Init list
 
     try:
         with conn.cursor() as cur:
@@ -143,17 +168,19 @@ def dashboard():
             chart_data = {'labels': ['Mon','Tue','Wed'], 'prices': [120000, 125000, 122000]} 
 
         movers_data = get_movers(conn)
+        stock_alerts_list = get_stock_alerts_list(conn) # Fetch alerts
+
         if not movers_data:
             movers_data = [{'short_name': 'Demo: Ryzen', 'price': 'LKR 125k', 'change': '+1%', 'trend': 'up'}]
 
     except Exception as e:
         print(f"Error: {e}")
     finally:
-
         if conn:
             conn.close()
 
-    return render_template('market_overview.html', stats=stats, chart_data=chart_data, movers=movers_data, active_page='dashboard')
+    # Pass stock_alerts_list to template
+    return render_template('market_overview.html', stats=stats, chart_data=chart_data, movers=movers_data, stock_alerts=stock_alerts_list, active_page='dashboard')
 
 #price explorer route
 @app.route('/explorer')
@@ -228,11 +255,11 @@ def price_explorer():
             conn.close()
 
     return render_template('price_explorer.html', 
-                         active_page='explorer', 
-                         query=query, 
-                         tiers=tiers, 
-                         search_stats=search_stats,
-                         watchlist=watchlist)
+                          active_page='explorer', 
+                          query=query, 
+                          tiers=tiers, 
+                          search_stats=search_stats,
+                          watchlist=watchlist)
 
 #routes api
 @app.route('/api/analyze_tier', methods=['POST'])

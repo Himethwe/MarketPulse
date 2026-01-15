@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block content %}
+<div style="padding-bottom: 100px;">
+
     <div class="header-container">
         <header class="pill-header">
             <h1>Market Overview</h1>
@@ -57,75 +59,133 @@
                     <span class="legend-dot"></span> Avg Price
                 </div>
             </div>
-            <div class="chart-area">
+            <div class="chart-area" style="min-height: 550px;">
                 <canvas id="marketChart"></canvas>
             </div>
         </div>
 
-        <div class="movers-card">
-            <div class="card-header">
-                <h2>Top Movers</h2>
-                <span class="header-tag">24h</span>
-            </div>
-            <div class="movers-list">
-                {% for item in movers %}
-                <div class="mover-item">
-                    <div class="mover-info">
-                        <span class="mover-name">{{ item.short_name }}</span>
-                        <span class="mover-price">{{ item.price }}</span>
-                    </div>
-                    <div class="mover-change {{ 'badge-green' if item.trend == 'up' else 'badge-red' }}">
-                        {{ item.change }}
-                    </div>
+        <div style="display: flex; flex-direction: column; gap: 20px; flex: 1; min-width: 300px;">
+            
+            <div class="movers-card" style="flex: 1;">
+                <div class="card-header">
+                    <h2>Top Movers</h2>
+                    <span class="header-tag">24h</span>
                 </div>
-                {% endfor %}
+                <div class="movers-list">
+                    {% for item in movers %}
+                    <div class="mover-item">
+                        <div class="mover-info">
+                            <span class="mover-name">{{ item.short_name }}</span>
+                            <span class="mover-price">{{ item.price }}</span>
+                        </div>
+                        <div class="mover-change {{ 'badge-green' if item.trend == 'up' else 'badge-red' }}">
+                            {{ item.change }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="padding: 1rem; color: #666; text-align: center;">No Movers</div>
+                    {% endfor %}
+                </div>
             </div>
+
+            <div class="movers-card" style="flex: 1;">
+                <div class="card-header">
+                    <h2>Stock Alerts</h2>
+                    <span class="header-tag" style="background: rgba(234, 179, 8, 0.2); color: #eab308;">Critical</span>
+                </div>
+                <div class="movers-list">
+                    {% for alert in stock_alerts %}
+                    <div class="mover-item">
+                        <div class="mover-info">
+                            <span class="mover-name" style="color: #ef4444;">{{ alert.name }}</span>
+                            <span class="mover-price" style="font-size: 0.85rem; color: #71717a;">{{ alert.vendor }}</span>
+                        </div>
+                        <div class="mover-change" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem;">
+                            OUT
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="padding: 1rem; color: #666; text-align: center;">All Stocked Up!</div>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
     </section>
 
-    <script id="data-labels" type="application/json">{{ chart_data.labels | tojson }}</script>
+</div> <script id="data-labels" type="application/json">{{ chart_data.labels | tojson }}</script>
     <script id="data-prices" type="application/json">{{ chart_data.prices | tojson }}</script>
 
-    <script>
-        const chartLabels = JSON.parse(document.getElementById('data-labels').textContent);
-        const chartValues = JSON.parse(document.getElementById('data-prices').textContent);
+<script>
+    const chartLabels = JSON.parse(document.getElementById('data-labels').textContent);
+    const chartValues = JSON.parse(document.getElementById('data-prices').textContent);
 
-        const ctx = document.getElementById('marketChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+    const canvas = document.getElementById('marketChart');
+    const ctx = canvas.getContext('2d');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    data: chartValues,
-                    backgroundColor: gradient,
-                    borderColor: '#3b82f6',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointBackgroundColor: '#18181b',
-                    pointBorderColor: '#3b82f6',
-                    pointRadius: 4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        grid: { color: 'rgba(255,255,255,0.05)' }, 
-                        ticks: { 
-                            color: '#71717a',
-                            callback: function(val) { return (val/1000).toFixed(0) + 'k'; }
-                        } 
-                    },
-                    x: { grid: { display: false }, ticks: { color: '#71717a' } }
+    // Gradient Matches Height
+    const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+    
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.25)'); 
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');  
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Avg Price', 
+                data: chartValues,
+                backgroundColor: gradient,
+                borderColor: '#3b82f6',
+                borderWidth: 3,
+                tension: 0.4, 
+                pointBackgroundColor: '#18181b', 
+                pointBorderColor: '#3b82f6',
+                pointRadius: 6, 
+                pointHoverRadius: 8,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(24, 24, 27, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#334155',
+                    borderWidth: 1
                 }
+            },
+            scales: {
+                y: { 
+                    grid: { color: 'rgba(255,255,255,0.05)' }, 
+                    ticks: { 
+                        color: '#71717a',
+                        font: { family: "'Inter', sans-serif", size: 11 },
+                        callback: function(val) { return (val/1000).toFixed(0) + 'k'; }
+                    },
+                    beginAtZero: false 
+                },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#71717a',
+                        font: { family: "'Inter', sans-serif", size: 11 }
+                    } 
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
             }
-        });
-    </script>
+        }
+    });
+</script>
 {% endblock %}

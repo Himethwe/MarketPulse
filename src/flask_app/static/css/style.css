@@ -191,3 +191,31 @@ p { color: var(--text-muted); margin-top: 0; }
 .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
 .sidebar.collapsed .logo-area { justify-content: center; }
 .sidebar.collapsed .nav-links a { justify-content: center; padding: 12px; }
+
+/* --- GLOBAL SCROLLBAR STYLING (Main Page) --- */
+
+/* Target the main content area */
+.main-content {
+    scrollbar-width: thin;          /* Firefox */
+    scrollbar-color: #4a4a52 transparent; /* Firefox */
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+.main-content::-webkit-scrollbar {
+    width: 10px; /* Slightly wider than the card scrollbars for better usability */
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background-color: #3f3f46; 
+    border-radius: 20px;       
+    border: 3px solid transparent; /* Creates a "floating" look */
+    background-clip: content-box;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background-color: #52525b; 
+}
