@@ -1,4 +1,3 @@
-````markdown
 # ⚡ MarketPulse AI - Intelligent Price Tracker
 
 **MarketPulse** is a full-stack data intelligence platform designed to track, analyze, and predict laptop prices across multiple e-commerce vendors in Sri Lanka. It combines automated web scraping with machine learning to provide actionable market insights.
@@ -26,11 +25,11 @@ _Search view with tiered pricing analysis_
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.12, Flask
-- **Database:** SQLite (Lightweight & Portable)
+- **Backend:** Python,Flask
+- **Database:** Postgre SQL
 - **Data Processing:** Pandas, NumPy
-- **Machine Learning:** Scikit-Learn (Linear Regression for Time-Series Forecasting)
-- **Web Scraping:** Selenium WebDriver
+- **Machine Learning:** Scikit-Learn, XGBoost, sentence_transformers
+- **Web Scraping:** Selenium WebDriver, BeautifulSoup
 - **Frontend:** HTML5, CSS3, Chart.js
 - **Automation:** Windows Task Scheduler & Batch Scripting
 
@@ -46,7 +45,6 @@ Follow these steps to run the project locally.
 git clone [https://github.com/HimethWe/MarketPulse.git](https://github.com/HimethWe/MarketPulse.git)
 cd MarketPulse
 ```
-````
 
 ### 2. Set Up Virtual Environment
 
@@ -76,7 +74,6 @@ python src/flask_app/app.py
 
 Open your browser and navigate to: `http://127.0.0.1:5000`
 
----
 
 ## 🔄 Automated Data Pipeline (Local Setup)
 
@@ -95,6 +92,3 @@ To keep the dashboard data fresh, this project includes a local automation scrip
 
 The system will now wake up automatically, fetch the latest prices from 4+ vendors, update the database, and retrain the AI models every day.
 
-```
-
-```
